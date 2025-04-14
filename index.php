@@ -1,29 +1,56 @@
+<?php
+session_start();
+require_once 'config/database.php';
+
+// Get current user session if exists
+$currentUser = isset($_SESSION['user']) ? $_SESSION['user'] : null;
+
+// Get rooms data from database
+$db = Database::getInstance();
+$rooms = $db->query("SELECT * FROM rooms")->fetchAll(PDO::FETCH_ASSOC);
+
+// Get bookings data to check availability
+$bookings = $db->query("
+    SELECT r.room_id, r.room_name, b.status, b.booking_start, b.booking_end 
+    FROM rooms r 
+    LEFT JOIN bookings b ON r.room_id = b.room_id 
+    WHERE b.status IS NULL OR b.status != 'Quá hạn'
+")->fetchAll(PDO::FETCH_ASSOC);
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BKSpace - Dashboard</title>
+    <title>BKSpace - Smart Study Space at HCMUT</title>
     <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <!-- External CSS -->
-    <link href="/assets/css/styles.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
+    <!-- Include navbar using PHP -->
+    <?php 
+        require 'components/header.php';
+    ?>
+
     <!-- Hero Section -->
     <div class="hero">
-        <img src="/assets/img/main_page_bg.png" alt="HCMUT Building">
-        <div class="hero-text">
+        <img src="assets/img/main_page_bg.png" alt="HCMUT Building">
+        <div class="hero-text"> 
             CHÀO MỪNG BẠN ĐẾN VỚI<br>BKSPACE!
+            <?php if ($currentUser): ?>
+                <p class="welcome-text">Xin chào, <?php echo htmlspecialchars($currentUser['name']); ?>!</p>
+            <?php endif; ?>
         </div>
     </div>
     
     <!-- Features Section -->
-    <section class="py-5">
+    <section class="features py-5">
         <div class="container">
             <h2 class="text-center features-title">Những tính năng tuyệt vời của<br>BKSpace</h2>
             <div class="row g-4">
@@ -79,38 +106,11 @@
         </div>
     </section>
 
-    <!-- Quick Actions Section -->
-    <section class="py-5 bg-light">
-        <div class="container">
-            <h2 class="text-center mb-4">Thao tác nhanh</h2>
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="card h-100">
-                        <div class="card-body text-center p-4">
-                            <i class="bi bi-calendar-plus display-4 text-primary mb-3"></i>
-                            <h3 class="h5">Đặt phòng mới</h3>
-                            <p class="text-muted">Đặt phòng học ngay bây giờ</p>
-                            <a href="#" class="btn btn-primary">Đặt phòng</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card h-100">
-                        <div class="card-body text-center p-4">
-                            <i class="bi bi-clock-history display-4 text-primary mb-3"></i>
-                            <h3 class="h5">Lịch sử đặt phòng</h3>
-                            <p class="text-muted">Xem lại các lần đặt phòng trước đây</p>
-                            <a href="#" class="btn btn-primary">Xem lịch sử</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <!-- Include footer using PHP -->
+    <?php require 'components/footer.php'; ?>
 
-    <!-- Bootstrap JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Components JS -->
-    <script src="/script.js"></script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- <script src="script.js"></script> -->
 </body>
 </html> 
