@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../config/database.php';
+require_once '../config/db_connection.php';
 
 // Get current user session if exists
 $currentUser = isset($_SESSION['user']) ? $_SESSION['user'] : null;

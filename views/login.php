@@ -1,10 +1,14 @@
 <?php
 session_start();
-require_once '../config/database.php';
+require_once '../config/db_connection.php';
 
 // Redirect if already logged in
 if (isset($_SESSION['user'])) {
-    header('Location: dashboard.php');
+    if ($_SESSION['user']['user_type'] === 'admin') {
+        header('Location: admin.php');
+    } else {
+        header('Location: ' . ($_SESSION['redirect_after_login'] ?? '../index.php'));
+    }
     exit();
 }
 
@@ -12,25 +16,47 @@ if (isset($_SESSION['user'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
+    $login_type = $_POST['login_type'] ?? ''; // Add login type to differentiate between admin and local
     
     if (!empty($username) && !empty($password)) {
-        $db = Database::getInstance();
-        $stmt = $db->query(
-            "SELECT * FROM users WHERE username = ? AND role = 'admin'",
-            [$username]
-        );
-        $user = $stmt->fetch();
+        $db = new DbConnect();
+        $conn = $db->connect();
         
-        if ($user && password_verify($password, $user['password'])) {
+        if ($login_type === 'admin') {
+            // Admin login - check for admin type specifically
+            $stmt = $conn->prepare("SELECT * FROM users WHERE username = ? AND password = ? AND user_type = 'admin'");
+            $stmt->bind_param("ss", $username, $password);
+        } else {
+            // Local user login - check for non-admin users
+            $stmt = $conn->prepare("SELECT * FROM users WHERE username = ? AND password = ? AND user_type != 'admin'");
+            $stmt->bind_param("ss", $username, $password);
+        }
+        
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        
+        if ($user) {
             $_SESSION['user'] = [
                 'id' => $user['id'],
                 'name' => $user['name'],
-                'role' => $user['role']
+                'user_type' => $user['user_type']
             ];
-            header('Location: dashboard.php');
+            
+            if ($user['user_type'] === 'admin') {
+                header('Location: admin.php');
+            } else {
+                $redirect = $_SESSION['redirect_after_login'] ?? '../index.php';
+                unset($_SESSION['redirect_after_login']); // Clear the stored redirect
+                header('Location: ' . $redirect);
+            }
             exit();
         } else {
-            $error = "Tên đăng nhập hoặc mật khẩu không đúng";
+            if ($login_type === 'admin') {
+                $error = "Thông tin đăng nhập quản trị viên không đúng";
+            } else {
+                $error = "Tên đăng nhập hoặc mật khẩu không đúng";
+            }
         }
     }
 }
@@ -78,6 +104,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <h3 class="mb-0">Quản trị viên BKSpace</h3>
                                     </div>
                                 </button>
+
+                                <button type="button" class="btn btn-outline-secondary p-3 role-option" data-bs-toggle="modal" data-bs-target="#localUserModal">
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-person-fill me-2 fs-4"></i>
+                                        <h3 class="mb-0">User local</h3>
+                                    </div>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -96,6 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="modal-body">
                     <form method="POST" action="">
+                        <input type="hidden" name="login_type" value="admin">
                         <div class="mb-3">
                             <label for="username" class="form-label">Tên đăng nhập</label>
                             <input type="text" class="form-control" id="username" name="username" required>
@@ -111,9 +145,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
+    <!-- Local User Login Modal -->
+    <div class="modal fade" id="localUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Đăng nhập người dùng cục bộ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="">
+                        <input type="hidden" name="login_type" value="local">
+                        <div class="mb-3">
+                            <label for="local_username" class="form-label">Tên đăng nhập</label>
+                            <input type="text" class="form-control" id="local_username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="local_password" class="form-label">Mật khẩu</label>
+                            <input type="password" class="form-control" id="local_password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+                        <div class="mt-3 text-center">
+                            <small class="text-muted">Chưa có tài khoản? Vui lòng liên hệ quản trị viên</small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?php include '../components/footer.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- <script src="/script.js"></script> -->
 </body>
 </html> 

@@ -60,10 +60,6 @@ $basePath = $isInViews ? '../' : '';
                     </a>
                 </div>
             </div>
-        <!-- </div>
-        <hr class="my-4">
-        <div class="text-center">
-            <p class="mb-0">&copy; <?php echo date('Y'); ?> BKSPACE. All rights reserved.</p>
-        </div> -->
+        </div>
     </div>
 </footer> 

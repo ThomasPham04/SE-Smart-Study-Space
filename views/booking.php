@@ -1,31 +1,27 @@
 <?php
 session_start();
-require_once '../config/database.php';
 
-// Get current user session if exists
-$currentUser = isset($_SESSION['user']) ? $_SESSION['user'] : null;
+// Check if user is logged in
+if (!isset($_SESSION['user'])) {
+    $_SESSION['redirect_after_login'] = 'booking.php'; // Store the intended destination
+    header('Location: login.php');
+    exit();
+}
 
-// Get rooms data from database
-$db = Database::getInstance();
-$rooms = $db->query("SELECT * FROM rooms")->fetchAll(PDO::FETCH_ASSOC);
+require_once '../config/db_connection.php';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BKSpace - Booking</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <!-- External CSS -->
-    <link rel="stylesheet" href="../assets/css/styles.css">  
+    <title>Đặt chỗ - BKSpace</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="../assets/css/styles.css" rel="stylesheet">
 </head>
 <body>
-    <?php require '../components/header.php'; ?>
+    <?php include '../components/header.php'; ?>
 
     <div class="sub-hero">
         <img src="../assets/img/booking-bg.png" alt="HCMUT Building">
@@ -75,7 +71,7 @@ $rooms = $db->query("SELECT * FROM rooms")->fetchAll(PDO::FETCH_ASSOC);
                         <div class="col-md-4 mb-3">
                             <a href="booking-confirm.php" class="room-card">
                                 <img src="../assets/img/Card.png" alt="Phòng học nhóm 4" class="img-fluid">
-                                <p class="text-center">Phòng học nhóm 4</p>
+                                <p class="text-center">Phòng học nhóm 3</p>
                             </a>
                         </div>
                     </div>
@@ -83,19 +79,19 @@ $rooms = $db->query("SELECT * FROM rooms")->fetchAll(PDO::FETCH_ASSOC);
                         <div class="col-md-4 mb-3">
                             <a href="booking-confirm.php" class="room-card">
                                 <img src="../assets/img/Card.png" alt="Phòng học 1 người" class="img-fluid">
-                                <p class="text-center mt-3">Phòng học 1 người</p>
+                                <p class="text-center mt-3">Phòng học nhóm 4</p>
                             </a>
                         </div>
                         <div class="col-md-4 mb-3">
                             <a href="booking-confirm.php" class="room-card">
                                 <img src="../assets/img/Card.png" alt="Phòng học nhóm 2" class="img-fluid">
-                                <p class="text-center">Phòng học nhóm 2</p>
+                                <p class="text-center">Phòng học nhóm 5</p>
                             </a>
                         </div>
                         <div class="col-md-4 mb-3">
                             <a href="booking-confirm.php" class="room-card">
                                 <img src="../assets/img/Card.png" alt="Phòng học nhóm 4" class="img-fluid">
-                                <p class="text-center">Phòng học nhóm 4</p>
+                                <p class="text-center">Phòng học nhóm 6</p>
                             </a>
                         </div>
                     </div>

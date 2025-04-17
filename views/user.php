@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../config/database.php';
+require_once '../config/db_connection.php';
 
 // Redirect to login if not authenticated
 if (!isset($_SESSION['user'])) {

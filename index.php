@@ -1,21 +1,21 @@
 <?php
 session_start();
-require_once 'config/database.php';
+require_once 'config/db_connection.php';
 
-// Get current user session if exists
-$currentUser = isset($_SESSION['user']) ? $_SESSION['user'] : null;
+// // Get current user session if exists
+// $currentUser = isset($_SESSION['user']) ? $_SESSION['user'] : null;
 
-// Get rooms data from database
-$db = Database::getInstance();
-$rooms = $db->query("SELECT * FROM rooms")->fetchAll(PDO::FETCH_ASSOC);
+// // Get rooms data from database
+// $db = Database::getInstance();
+// $rooms = $db->query("SELECT * FROM rooms")->fetchAll(PDO::FETCH_ASSOC);
 
-// Get bookings data to check availability
-$bookings = $db->query("
-    SELECT r.room_id, r.room_name, b.status, b.booking_start, b.booking_end 
-    FROM rooms r 
-    LEFT JOIN bookings b ON r.room_id = b.room_id 
-    WHERE b.status IS NULL OR b.status != 'Quá hạn'
-")->fetchAll(PDO::FETCH_ASSOC);
+// // Get bookings data to check availability
+// $bookings = $db->query("
+//     SELECT r.room_id, r.room_name, b.status, b.booking_start, b.booking_end 
+//     FROM rooms r 
+//     LEFT JOIN bookings b ON r.room_id = b.room_id 
+//     WHERE b.status IS NULL OR b.status != 'Quá hạn'
+// ")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -43,9 +43,7 @@ $bookings = $db->query("
         <img src="assets/img/main_page_bg.png" alt="HCMUT Building">
         <div class="hero-text"> 
             CHÀO MỪNG BẠN ĐẾN VỚI<br>BKSPACE!
-            <?php if ($currentUser): ?>
-                <p class="welcome-text">Xin chào, <?php echo htmlspecialchars($currentUser['name']); ?>!</p>
-            <?php endif; ?>
+            
         </div>
     </div>
     

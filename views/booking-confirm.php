@@ -45,6 +45,18 @@
             </div>
 
             <div class="form-group">
+                <label for="start_date">NGÀY SỬ DỤNG</label>
+                <input 
+                    type="date" 
+                    id="start_date" 
+                    name="start_date" 
+                    required
+                    min="<?php echo date('Y-m-d'); ?>"
+                >
+                <span class="hint">Ví dụ: 01/01/2024</span>
+            </div>
+
+            <div class="form-group">
                 <label for="start_time">THỜI GIAN BẮT ĐẦU</label>
                 <input 
                     type="time" 
@@ -76,17 +88,28 @@
     <?php require '../components/footer.php'; ?>
 
 
-    <!-- <script>
+    <script>
         // Form validation
         document.querySelector('.booking-form').addEventListener('submit', function(e) {
+            const startDate = document.getElementById('start_date').value;
             const startTime = document.getElementById('start_time').value;
+            const endDate = document.getElementById('end_date').value;
             const endTime = document.getElementById('end_time').value;
             
-            if (startTime >= endTime) {
+            // Convert to Date objects for comparison
+            const startDateTime = new Date(startDate + 'T' + startTime);
+            const endDateTime = new Date(endDate + 'T' + endTime);
+            
+            if (startDateTime >= endDateTime) {
                 e.preventDefault();
                 alert('Thời gian kết thúc phải sau thời gian bắt đầu!');
             }
         });
-    </script> -->
+
+        // Set minimum end date based on start date
+        document.getElementById('start_date').addEventListener('change', function() {
+            document.getElementById('end_date').min = this.value;
+        });
+    </script>
 </body>
 </html> 
