@@ -57,19 +57,19 @@ require_once '../config/db_connection.php';
                     <h4 class="border-bottom pb-2 mb-4 text-center">DANH SÁCH PHÒNG</h4>
                     <div class="row g-3 mb-3">
                         <div class="col-md-4 mb-3">
-                            <a href="booking-confirm.php" class="room-card">
+                            <a href="booking-confirm.php?room_id=1" class="room-card">
                                 <img src="../assets/img/Card.png" alt="Phòng học 1 người" class="img-fluid">
                                 <p class="text-center">Phòng học 1 người</p>
                             </a>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <a href="booking-confirm.php" class="room-card">
+                            <a href="booking-confirm.php?room_id=2" class="room-card">
                                 <img src="../assets/img/Card.png" alt="Phòng học nhóm 2" class="img-fluid">
                                 <p class="text-center">Phòng học nhóm 2</p>
                             </a>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <a href="booking-confirm.php" class="room-card">
+                            <a href="booking-confirm.php?room_id=3" class="room-card">
                                 <img src="../assets/img/Card.png" alt="Phòng học nhóm 4" class="img-fluid">
                                 <p class="text-center">Phòng học nhóm 3</p>
                             </a>
@@ -77,19 +77,19 @@ require_once '../config/db_connection.php';
                     </div>
                     <div class="row g-3 mb-3">
                         <div class="col-md-4 mb-3">
-                            <a href="booking-confirm.php" class="room-card">
+                            <a href="booking-confirm.php?room_id=4" class="room-card">
                                 <img src="../assets/img/Card.png" alt="Phòng học 1 người" class="img-fluid">
                                 <p class="text-center mt-3">Phòng học nhóm 4</p>
                             </a>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <a href="booking-confirm.php" class="room-card">
+                            <a href="booking-confirm.php?room_id=5" class="room-card">
                                 <img src="../assets/img/Card.png" alt="Phòng học nhóm 2" class="img-fluid">
                                 <p class="text-center">Phòng học nhóm 5</p>
                             </a>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <a href="booking-confirm.php" class="room-card">
+                            <a href="booking-confirm.php?room_id=6" class="room-card">
                                 <img src="../assets/img/Card.png" alt="Phòng học nhóm 4" class="img-fluid">
                                 <p class="text-center">Phòng học nhóm 6</p>
                             </a>
