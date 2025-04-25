@@ -17,6 +17,7 @@
 <body>
     <?php 
     session_start();
+    date_default_timezone_set('Asia/Ho_Chi_Minh'); // Set timezone to Vietnam time
     require '../components/header.php';
     require_once '../config/db_connection.php';
 
@@ -37,12 +38,18 @@
         exit();
     }
 
-    $stmt = $conn->prepare("SELECT * FROM rooms WHERE id = ?");
+    $stmt = $conn->prepare("
+        SELECT r.*, rt.name as room_type_name, rt.capacity 
+        FROM rooms r
+        JOIN room_types rt ON r.room_type_id = rt.id
+        WHERE r.id = ?
+    ");
     $stmt->bind_param("i", $room_id);
     $stmt->execute();
     $room = $stmt->get_result()->fetch_assoc();
 
     if (!$room) {
+        $_SESSION['error'] = 'Phòng không tồn tại';
         header('Location: booking.php');
         exit();
     }
@@ -69,8 +76,34 @@
         }
 
         // Combine date and time for database
-        $start_datetime = $start_date . ' ' . $start_time;
-        $end_datetime = $start_date . ' ' . $end_time;
+        $start_datetime_str = $start_date . ' ' . $start_time;
+        $end_datetime_str = $start_date . ' ' . $end_time;
+        
+        // --- Server-side Time Validation ---
+        $current_timestamp = time(); // Current time based on Asia/Ho_Chi_Minh timezone
+        $start_timestamp = strtotime($start_datetime_str);
+        $end_timestamp = strtotime($end_datetime_str);
+
+        if ($start_timestamp === false || $end_timestamp === false) {
+             $_SESSION['error'] = 'Định dạng ngày giờ không hợp lệ!';
+             header('Location: booking-confirm.php?room_id=' . $room_id);
+             exit();
+        }
+        
+        // Check if start time is in the past
+        if ($start_timestamp < $current_timestamp) {
+            $_SESSION['error'] = 'Không thể đặt phòng trong quá khứ!';
+            header('Location: booking-confirm.php?room_id=' . $room_id);
+            exit();
+        }
+        
+        // Check if end time is before start time
+        if ($end_timestamp <= $start_timestamp) {
+            $_SESSION['error'] = 'Thời gian kết thúc phải sau thời gian bắt đầu!';
+            header('Location: booking-confirm.php?room_id=' . $room_id);
+            exit();
+        }
+        // --- End Server-side Time Validation ---
 
         // Check if room is available
         $check_stmt = $conn->prepare("
@@ -127,19 +160,7 @@
         <div class="room-info">
             <h3>Thông tin phòng</h3>
             <p><strong>Tên phòng:</strong> <?php echo htmlspecialchars($room['name']); ?></p>
-            <p><strong>Loại phòng:</strong> 
-                <?php 
-                echo match($room['room_type']) {
-                    'single' => 'Phòng học 1 người',
-                    'group_2' => 'Phòng học nhóm 2',
-                    'group_3' => 'Phòng học nhóm 3',
-                    'group_4' => 'Phòng học nhóm 4',
-                    'group_5' => 'Phòng học nhóm 5',
-                    'group_6' => 'Phòng học nhóm 6',
-                    default => 'Phòng học'
-                };
-                ?>
-            </p>
+            <p><strong>Loại phòng:</strong> <?php echo htmlspecialchars($room['room_type_name']); ?></p>
             <p><strong>Sức chứa:</strong> <?php echo htmlspecialchars($room['capacity']); ?> người</p>
             <p><strong>Tòa nhà:</strong> <?php echo htmlspecialchars($room['building']); ?></p>
             <p><strong>Tầng:</strong> <?php echo htmlspecialchars($room['floor']); ?></p>
@@ -195,20 +216,76 @@
     <?php require '../components/footer.php'; ?>
 
     <script>
-        // Form validation
-        document.querySelector('.booking-form').addEventListener('submit', function(e) {
-            const startDate = document.getElementById('start_date').value;
-            const startTime = document.getElementById('start_time').value;
-            const endTime = document.getElementById('end_time').value;
+        // Enhanced date/time validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const startDateInput = document.getElementById('start_date');
+            const startTimeInput = document.getElementById('start_time');
+            const endTimeInput = document.getElementById('end_time');
             
-            // Convert to Date objects for comparison
-            const startDateTime = new Date(startDate + 'T' + startTime);
-            const endDateTime = new Date(startDate + 'T' + endTime);
+            // Get current date and time in Vietnam timezone
+            const now = new Date();
+            const currentDate = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
             
-            if (startDateTime >= endDateTime) {
-                e.preventDefault();
-                alert('Thời gian kết thúc phải sau thời gian bắt đầu!');
+            // Format current time as HH:MM
+            const currentTimeFormatted = 
+                `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
+            
+            // Update min time when date changes
+            function updateMinTime() {
+                // If selected date is today, set min time to current time
+                if (startDateInput.value === currentDate) {
+                    startTimeInput.min = currentTimeFormatted;
+                    
+                    // If current time is already set and it's before current time, reset it
+                    if (startTimeInput.value && startTimeInput.value < currentTimeFormatted) {
+                        startTimeInput.value = currentTimeFormatted;
+                    }
+                } else {
+                    // For future dates, any time is valid
+                    startTimeInput.min = "";
+                }
             }
+            
+            // Initial setup
+            updateMinTime();
+            
+            // Update min time whenever date changes
+            startDateInput.addEventListener('change', updateMinTime);
+            
+            // Form validation
+            document.querySelector('.booking-form').addEventListener('submit', function(e) {
+                const startDate = startDateInput.value;
+                const startTime = startTimeInput.value;
+                const endTime = endTimeInput.value;
+                
+                // Check if time fields are filled
+                if (!startTime || !endTime) {
+                    e.preventDefault();
+                    alert('Vui lòng chọn thời gian bắt đầu và kết thúc!');
+                    return;
+                }
+                
+                // Convert to Date objects for comparison
+                const startDateTime = new Date(startDate + 'T' + startTime);
+                const endDateTime = new Date(startDate + 'T' + endTime);
+                const currentDateTime = new Date();
+                
+                // Check if booking start time is in the past
+                if (startDateTime <= currentDateTime) {
+                    e.preventDefault();
+                    alert('Không thể đặt phòng trong quá khứ!');
+                    return;
+                }
+                
+                // Check if end time is after start time
+                if (startDateTime >= endDateTime) {
+                    e.preventDefault();
+                    alert('Thời gian kết thúc phải sau thời gian bắt đầu!');
+                    return;
+                }
+            });
         });
     </script>
 </body>

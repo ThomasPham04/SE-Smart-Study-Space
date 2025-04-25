@@ -475,3 +475,96 @@ body {
 }
 
 
+/* Booking History Page Styles */
+.booking-history {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1rem;
+}
+.page-title {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    color: #333;
+}
+.search-box {
+    margin-bottom: 2rem;
+}
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+.btn-check-in {
+    background-color: #0d6efd;
+    color: white;
+}
+.btn-check-out {
+    background-color: #198754;
+    color: white;
+}
+.btn-cancel {
+    background-color: #dc3545;
+    color: white;
+}
+.btn-check-in:disabled, .btn-check-out:disabled, .btn-cancel:disabled {
+    opacity: 0.5;
+}
+.status-pending {
+    color: #fd7e14;
+}
+.status-active {
+    color: #198754;
+}
+.status-completed {
+    color: #0d6efd;
+}
+.status-cancelled {
+    color: #dc3545;
+}
+
+/* New status for expired bookings */
+.status-expired {
+    color: #6c757d; /* Bootstrap secondary color */
+}
+
+/* Check-in Page Styles */
+.checkin-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    background-color: #ffffff;
+    text-align: center;
+}
+.qr-code {
+    margin: 2rem auto;
+    width: 300px;
+    height: 300px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: white;
+}
+.timer {
+    font-size: 1.5rem;
+    color: #dc3545;
+    font-weight: bold;
+    margin: 1rem 0;
+}
+.room-details {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    text-align: left;
+}
+.access-code {
+    font-family: monospace;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    background-color: #f8f9fa;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+}

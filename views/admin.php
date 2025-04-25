@@ -42,7 +42,7 @@ $adminName = $_SESSION['user']['name'];
                             <a href="#" class="list-group-item list-group-item-action">
                                 <i class="bi bi-calendar-check me-2"></i>Quản lý đặt phòng
                             </a>
-                            <a href="#" class="list-group-item list-group-item-action">
+                            <a href="manage_rooms.php" class="list-group-item list-group-item-action">
                                 <i class="bi bi-building me-2"></i>Quản lý phòng
                             </a>
                             <a href="#" class="list-group-item list-group-item-action">
@@ -89,7 +89,7 @@ $adminName = $_SESSION['user']['name'];
                                     <div class="card-body">
                                         <h5 class="card-title">Tổng số phòng</h5>
                                         <h2 class="card-text">0</h2>
-                                        <a href="#" class="btn btn-light btn-sm mt-2">
+                                        <a href="manage_rooms.php" class="btn btn-light btn-sm mt-2">
                                             <i class="bi bi-building"></i> Quản lý phòng
                                         </a>
                                     </div>
@@ -108,7 +108,7 @@ $adminName = $_SESSION['user']['name'];
                                     <a href="#" class="btn btn-success">
                                         <i class="bi bi-calendar-plus"></i> Tạo đặt phòng mới
                                     </a>
-                                    <a href="#" class="btn btn-info text-white">
+                                    <a href="manage_rooms.php" class="btn btn-info text-white">
                                         <i class="bi bi-building-add"></i> Thêm phòng mới
                                     </a>
                                 </div>
