@@ -19,7 +19,7 @@ if (!isset($data['id']) || !isset($data['name']) || !isset($data['room_type_id']
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Missing required fields']);
     exit();
-}
+}   
 
 try {
     $db = new DbConnect();

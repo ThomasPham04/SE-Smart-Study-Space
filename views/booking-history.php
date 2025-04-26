@@ -67,8 +67,7 @@ unset($_SESSION['success_message']);
                         <th>Trạng thái</th>
                         <th>Thời gian đặt</th>
                         <th>Ngày đặt</th>
-                        <th>Check in / out</th>
-                        <th>Hủy phòng</th>
+                        <th>Tùy chỉnh</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -119,8 +118,7 @@ unset($_SESSION['success_message']);
                     <tr data-booking-id="<?php echo $booking['id']; ?>">
                         <td><?php echo $index + 1; ?></td>
                         <td>
-                            <?php echo htmlspecialchars($booking['room_name']); ?>
-                            <br>
+                            <?php echo htmlspecialchars($booking['room_name']); ?> -
                             <small class="text-muted">
                                 <?php echo htmlspecialchars($booking['building']) . ' - Tầng ' . $booking['floor']; ?>
                             </small>
@@ -129,6 +127,7 @@ unset($_SESSION['success_message']);
                         <td><?php echo $booking_time; ?></td>
                         <td><?php echo date('d/m/Y', strtotime($booking['booking_date'])); ?></td>
                         <td>
+                            <div class="action-buttons">
                             <?php 
                                 // Calculate check-in/cancel availability (already done in previous steps)
                                 $timeUntilBooking = $bookingStartTime - $currentTime;
@@ -150,13 +149,13 @@ unset($_SESSION['success_message']);
                             <?php else: ?>
                                 <button class="btn btn-sm btn-check-out" disabled title="Check-out không khả dụng">CHECK-OUT</button>
                             <?php endif; ?>
-                        </td>
-                        <td>
+
                             <?php if ($canCancel): ?>
                                 <a href="booking-cancel.php?id=<?php echo $booking['id']; ?>" class="btn btn-sm btn-cancel">HỦY PHÒNG</a>
                             <?php else: ?>
                                 <button class="btn btn-sm btn-cancel" disabled title="Chỉ có thể hủy trước thời gian đặt phòng hoặc nếu trạng thái là Pending/Confirmed">HỦY PHÒNG</button>
                             <?php endif; ?>
+                            </div>
                         </td>
                     </tr>
                     <?php endforeach; ?>
