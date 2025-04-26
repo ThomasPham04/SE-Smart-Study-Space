@@ -93,33 +93,9 @@ $users = $stmt->get_result();
 
     <div class="container mt-4">
         <div class="row">
-            <!-- Sidebar -->
             <div class="col-md-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title mb-3">Admin Menu</h5>
-                        <div class="list-group">
-                            <a href="admin.php" class="list-group-item list-group-item-action">
-                                <i class="bi bi-speedometer2 me-2"></i>Dashboard
-                            </a>
-                            <a href="manage_users.php" class="list-group-item list-group-item-action active">
-                                <i class="bi bi-people me-2"></i>Quản lý người dùng
-                            </a>
-                            <a href="#" class="list-group-item list-group-item-action">
-                                <i class="bi bi-calendar-check me-2"></i>Quản lý đặt phòng
-                            </a>
-                            <a href="#" class="list-group-item list-group-item-action">
-                                <i class="bi bi-building me-2"></i>Quản lý phòng
-                            </a>
-                            <a href="#" class="list-group-item list-group-item-action">
-                                <i class="bi bi-gear me-2"></i>Cài đặt
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                <?php include '../components/admin_menu.php'; ?>
             </div>
-
-            <!-- Main Content -->
             <div class="col-md-9">
                 <div class="card">
                     <div class="card-body">
@@ -139,16 +115,18 @@ $users = $stmt->get_result();
 
                         <!-- Search and Filter -->
                         <div class="row mb-4">
-                            <div class="col-md-8">
-                                <form class="d-flex" method="GET">
-                                    <input type="text" name="search" class="form-control me-2" placeholder="Tìm kiếm theo tên, email..." value="<?php echo htmlspecialchars($search); ?>">
-                                    <select name="type" class="form-select me-2" style="width: auto;">
+                            <div class="col-md-6">
+                                <form class="d-flex gap-2" method="GET">
+                                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Tìm kiếm theo tên, email..." value="<?php echo htmlspecialchars($search); ?>">
+                                    <select name="type" class="form-select form-select-sm" style="width: 100px;">
                                         <option value="">Tất cả</option>
                                         <option value="admin" <?php echo $filter_type === 'admin' ? 'selected' : ''; ?>>Admin</option>
                                         <option value="student" <?php echo $filter_type === 'student' ? 'selected' : ''; ?>>Sinh viên</option>
                                         <option value="staff" <?php echo $filter_type === 'staff' ? 'selected' : ''; ?>>Nhân viên</option>
                                     </select>
-                                    <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-search"></i>
+                                    </button>
                                 </form>
                             </div>
                         </div>

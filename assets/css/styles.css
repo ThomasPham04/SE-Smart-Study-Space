@@ -616,3 +616,28 @@ body {
     padding-left: 16px;
     padding-right: 16px;
 }
+
+.equipment-chip {
+    display: inline-block;
+    padding: 0.35em 1em;
+    font-size: 0.95em;
+    font-weight: 500;
+    border-radius: 16px;
+    background: #e0e0e0;
+    color: #333;
+    margin: 0 auto;
+    text-align: center;
+    white-space: nowrap;
+}
+.chip-ok {
+    background: #d4edda;
+    color: #155724;
+}
+.chip-warning {
+    background: #fff3cd;
+    color: #856404;
+}
+.chip-error {
+    background: #f8d7da;
+    color: #721c24;
+}

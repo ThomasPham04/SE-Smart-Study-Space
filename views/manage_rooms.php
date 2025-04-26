@@ -132,93 +132,128 @@ $room_types = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             background-color: #f8d7da;
             color: #721c24;
         }
+        .equipment-chip {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+        .chip-ok {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .chip-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .chip-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
     </style>
 </head>
 <body>
     <?php require '../components/header.php'; ?>
 
-    <div class="page-header">
-        <h1>QUẢN LÝ PHÒNG</h1>
-    </div>
-
-    <div class="admin-container">
-        <div class="search-box">
-            <input type="text" class="form-control" placeholder="Tìm kiếm phòng...">
-            <button class="btn-add-room" data-bs-toggle="modal" data-bs-target="#addRoomModal">
-                <i class="bi bi-plus-circle me-2"></i>Thêm phòng
-            </button>
-        </div>
-
-        <div class="table-responsive">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Tên phòng</th>
-                        <th>Loại phòng</th>
-                        <th>Trạng thái</th>
-                        <th>Thiết bị</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($rooms as $index => $room): 
-                        $status_class = match($room['status']) {
-                            'available' => 'status-active',
-                            'maintenance' => 'status-maintenance',
-                            'unavailable' => 'status-inactive',
-                            default => ''
-                        };
-                        
-                        $status_text = match($room['status']) {
-                            'available' => 'Hoạt động',
-                            'maintenance' => 'Bảo trì',
-                            'unavailable' => 'Tạm đóng',
-                            default => $room['status']
-                        };
-                    ?>
-                    <tr>
-                        <td><?php echo $index + 1; ?></td>
-                        <td><?php echo htmlspecialchars($room['name']); ?>
-                            <br>
-                            <small class="text-muted">
-                                <?php echo htmlspecialchars($room['building']) . ' - Tầng ' . $room['floor']; ?>
-                            </small>
-                        </td>
-                        <td data-room-type-id="<?php echo $room['room_type_id']; ?>">
-                            <?php echo htmlspecialchars($room['room_type_name']); ?>
-                            <br>
-                            <small class="text-muted"><?php echo $room['capacity']; ?> người</small>
-                        </td>
-                        <td class="<?php echo $status_class; ?>" data-status="<?php echo $room['status']; ?>">
-                            <?php echo $status_text; ?>
-                        </td>
-                        <td>
-                            <?php if ($room['equipment_status'] === 'Đầy đủ'): ?>
-                                <span class="equipment-status equipment-ok">Đầy đủ</span>
-                            <?php elseif ($room['equipment_status'] === 'Bóng đèn bị hư'): ?>
-                                <span class="equipment-status equipment-issue">Bóng đèn bị hư</span>
-                            <?php elseif ($room['equipment_status'] === 'Thiếu ghế'): ?>
-                                <span class="equipment-status equipment-issue">Thiếu ghế</span>
-                            <?php elseif ($room['equipment_status'] === 'Hỏng máy lạnh'): ?>
-                                <span class="equipment-status equipment-issue">Hỏng máy lạnh</span>
-                            <?php endif; ?>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-primary me-1" title="Chỉnh sửa" 
-                                    data-bs-toggle="modal" data-bs-target="#editRoomModal" 
-                                    data-room-id="<?php echo $room['id']; ?>">
-                                <i class="bi bi-pencil"></i>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-3">
+                <?php include '../components/admin_menu.php'; ?>
+            </div>
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4 class="card-title mb-0">Quản lý phòng</h4>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+                                <i class="bi bi-plus-circle me-2"></i> Thêm phòng
                             </button>
-                            <button class="btn btn-sm btn-danger" title="Xóa" 
-                                    onclick="deleteRoom(<?php echo $room['id']; ?>)">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+                        </div>
+                        <div class="mb-4">
+                            <input type="text" class="form-control" placeholder="Tìm kiếm phòng...">
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Tên phòng</th>
+                                        <th>Loại phòng</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thiết bị</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($rooms as $index => $room): 
+                                        $status_class = match($room['status']) {
+                                            'available' => 'status-active',
+                                            'maintenance' => 'status-maintenance',
+                                            'unavailable' => 'status-inactive',
+                                            default => ''
+                                        };
+                                        
+                                        $status_text = match($room['status']) {
+                                            'available' => 'Hoạt động',
+                                            'maintenance' => 'Bảo trì',
+                                            'unavailable' => 'Tạm đóng',
+                                            default => $room['status']
+                                        };
+                                    ?>
+                                    <tr>
+                                        <td><?php echo $index + 1; ?></td>
+                                        <td><?php echo htmlspecialchars($room['name']); ?>
+                                            <br>
+                                            <small class="text-muted">
+                                                <?php echo htmlspecialchars($room['building']) . ' - Tầng ' . $room['floor']; ?>
+                                            </small>
+                                        </td>
+                                        <td data-room-type-id="<?php echo $room['room_type_id']; ?>">
+                                            <?php echo htmlspecialchars($room['room_type_name']); ?>
+                                            <br>
+                                            <small class="text-muted"><?php echo $room['capacity']; ?> người</small>
+                                        </td>
+                                        <td class="<?php echo $status_class; ?>" data-status="<?php echo $room['status']; ?>">
+                                            <span class="equipment-chip <?php 
+                                                echo match($room['status']) {
+                                                    'available' => 'chip-ok',
+                                                    'maintenance' => 'chip-warning',
+                                                    'unavailable' => 'chip-error',
+                                                    default => ''
+                                                };
+                                            ?>">
+                                                <?php echo $status_text; ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <?php if ($room['equipment_status'] === 'Đầy đủ'): ?>
+                                                <span class="equipment-status equipment-ok">Đầy đủ</span>
+                                            <?php elseif ($room['equipment_status'] === 'Bóng đèn bị hư'): ?>
+                                                <span class="equipment-status equipment-issue">Bóng đèn bị hư</span>
+                                            <?php elseif ($room['equipment_status'] === 'Thiếu ghế'): ?>
+                                                <span class="equipment-status equipment-issue">Thiếu ghế</span>
+                                            <?php elseif ($room['equipment_status'] === 'Hỏng máy lạnh'): ?>
+                                                <span class="equipment-status equipment-issue">Hỏng máy lạnh</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary me-1" title="Chỉnh sửa" 
+                                                    data-bs-toggle="modal" data-bs-target="#editRoomModal" 
+                                                    data-room-id="<?php echo $room['id']; ?>">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" title="Xóa" 
+                                                    onclick="deleteRoom(<?php echo $room['id']; ?>)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
