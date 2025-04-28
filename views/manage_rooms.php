@@ -149,6 +149,36 @@ $room_types = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             background-color: #f8d7da;
             color: #721c24;
         }
+        .pagination {
+            gap: 5px;
+        }
+        .pagination .page-item {
+            margin: 0;
+        }
+        .pagination .page-link {
+            border: 1px solid #dee2e6;
+            padding: 8px 12px;
+            color: #0d6efd;
+            background-color: #fff;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: #fff;
+        }
+        .pagination .page-item:first-child .page-link,
+        .pagination .page-item:last-child .page-link {
+            border-radius: 4px;
+        }
+        .pagination .page-link:hover {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+            color: #0a58ca;
+        }
+        .pagination .page-item.active .page-link:hover {
+            background-color: #0d6efd;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -251,6 +281,29 @@ $room_types = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 </tbody>
                             </table>
                         </div>
+
+                        <!-- Simple Pagination -->
+                        <nav aria-label="Page navigation" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item">
+                                    <a class="page-link" href="#" aria-label="Previous">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                                <li class="page-item"><a class="page-link" href="#">72</a></li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#" aria-label="Next">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
                 </div>
             </div>
