@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
 ?>
-<!-- Header/Navbar -->
+    <!-- Header/Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="<?php echo BASE_URL; ?>index.php">

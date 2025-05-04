@@ -641,3 +641,176 @@ body {
     background: #f8d7da;
     color: #721c24;
 }
+
+/* Booking Success Page Styles */
+.success-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    background-color: #ffffff;
+    position: relative;
+    z-index: 1;
+}
+.success-icon {
+    font-size: 5rem;
+    color: #28a745;
+    margin-bottom: 1rem;
+    display: block;
+    text-align: center;
+}
+.booking-details {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+.booking-details h3 {
+    color: #0d6efd;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+.btn-action {
+    margin-top: 1.5rem;
+    width: 100%;
+}
+
+/* Admin Page Styles */
+.admin-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+.page-header {
+    background: url('../assets/img/admin-bg.jpg') no-repeat center;
+    background-size: cover;
+    padding: 3rem 0;
+    position: relative;
+    margin-bottom: 2rem;
+}
+.page-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+.page-header h1 {
+    color: white;
+    position: relative;
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 0;
+}
+.search-box {
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 1rem;
+}
+.search-box input {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    text-align: center;
+    vertical-align: middle;
+}
+.table td {
+    vertical-align: middle;
+    text-align: center;
+}
+.status-active {
+    color: #28a745;
+    font-weight: 500;
+}
+.status-maintenance {
+    color: #ffc107;
+    font-weight: 500;
+}
+.status-inactive {
+    color: #dc3545;
+    font-weight: 500;
+}
+.btn-add-room {
+    background-color: #28a745;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.btn-add-room:hover {
+    background-color: #218838;
+}
+.equipment-status {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+.equipment-ok {
+    background-color: #d4edda;
+    color: #155724;
+}
+.equipment-issue {
+    background-color: #fff3cd;
+    color: #856404;
+}
+.equipment-missing {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+.equipment-chip {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+.chip-ok {
+    background-color: #d4edda;
+    color: #155724;
+}
+.chip-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+.chip-error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+.pagination {
+    gap: 5px;
+}
+.pagination .page-item {
+    margin: 0;
+}
+.pagination .page-link {
+    border: 1px solid #dee2e6;
+    padding: 8px 12px;
+    color: #0d6efd;
+    background-color: #fff;
+}
+.pagination .page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: #fff;
+}
+.pagination .page-item:first-child .page-link,
+.pagination .page-item:last-child .page-link {
+    border-radius: 4px;
+}
+.pagination .page-link:hover {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    color: #0a58ca;
+}
+.pagination .page-item.active .page-link:hover {
+    background-color: #0d6efd;
+    color: #fff;
+}

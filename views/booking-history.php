@@ -41,6 +41,7 @@ unset($_SESSION['success_message']);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <!-- External CSS -->
     <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"> </script>
 </head>
 <body>
     <?php require '../components/header.php'; ?>
@@ -132,14 +133,14 @@ unset($_SESSION['success_message']);
                                 // Calculate check-in/cancel availability (already done in previous steps)
                                 $timeUntilBooking = $bookingStartTime - $currentTime;
                                 $bookingInProgress = $currentTime >= $bookingStartTime && $currentTime <= $bookingEndTime;
-                                $canCheckIn = ($booking['status'] === 'confirmed' || $booking['status'] === 'pending') && (($timeUntilBooking <= 900 && $timeUntilBooking > -$bookingEndTime) || $bookingInProgress) ; // Allow check-in if pending/confirmed and within window or in progress
+                                $canCheckIn = ($booking['status'] === 'confirmed' || $booking['status'] === 'pending') && ($currentTime >= ($bookingStartTime - 900) && $currentTime <= $bookingEndTime);
                             
                                 $canCheckOut = ($booking['status'] === 'checked_in');
                                 $canCancel = ( ($booking['status'] === 'pending' || $booking['status'] === 'confirmed') && $currentTime < $bookingStartTime );
                             ?>
                             
                             <?php if ($canCheckIn): ?>
-                                <a href="booking-checkin.php?id=<?php echo $booking['id']; ?>" class="btn btn-sm btn-check-in">CHECK-IN</a>
+                                <button class="btn btn-sm btn-check-in btn-show-qr" data-booking-id="<?php echo $booking['id']; ?>">CHECK-IN</button>
                             <?php else: ?>
                                 <button class="btn btn-sm btn-check-in" disabled title="Check-in không khả dụng">CHECK-IN</button>
                             <?php endif; ?>
@@ -164,19 +165,72 @@ unset($_SESSION['success_message']);
         </div>
     </div>
 
+    <!-- QR Code Modal -->
+    <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="qrModalLabel">Check-in QR Code</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center" id="qrModalBody">
+            <div id="qrcode-modal" class="d-flex justify-content-center"></div>
+            <div id="qrLoading" class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <a href="#" id="fullCheckinPage" class="btn btn-outline-primary" target="_blank">Trang check-in đầy đủ</a>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <?php require '../components/footer.php'; ?>
 
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
         // Handle search functionality
         document.querySelector('.search-box input').addEventListener('keyup', function(e) {
             const searchText = e.target.value.toLowerCase();
             const rows = document.querySelectorAll('tbody tr');
-            
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
                 row.style.display = text.includes(searchText) ? '' : 'none';
+            });
+        });
+
+        // Show QR modal on check-in button click
+        document.querySelectorAll('.btn-show-qr').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const bookingId = this.getAttribute('data-booking-id');
+                const modal = new bootstrap.Modal(document.getElementById('qrModal'));
+                document.getElementById('qrcode-modal').innerHTML = '';
+                document.getElementById('qrLoading').style.display = '';
+                document.getElementById('fullCheckinPage').href = 'booking-checkin.php?id=' + bookingId;
+                modal.show();
+                // Fetch QR data via AJAX
+                fetch('booking-checkin.php?id=' + bookingId + '&qr_data_only=1')
+                    .then(res => res.text())
+                    .then(qrdata => {
+                        document.getElementById('qrLoading').style.display = 'none';
+                        if (!qrdata || qrdata.trim().startsWith('<!DOCTYPE') || qrdata.toLowerCase().includes('<html')) {
+                            document.getElementById('qrcode-modal').innerHTML = '<div class="alert alert-danger">Không thể tải mã QR. Vui lòng thử lại hoặc kiểm tra quyền truy cập.</div>';
+                        } else {
+                            new QRCode(document.getElementById('qrcode-modal'), {
+                                text: qrdata,
+                                width: 256,
+                                height: 256
+                            });
+                        }
+                    })
+                    .catch(() => {
+                        document.getElementById('qrLoading').style.display = 'none';
+                        document.getElementById('qrcode-modal').innerHTML = '<div class="alert alert-danger">Không thể tải mã QR. Vui lòng thử lại.</div>';
+                    });
             });
         });
     </script>

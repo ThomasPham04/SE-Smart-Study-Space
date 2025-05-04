@@ -84,78 +84,48 @@ unset($_SESSION['booking_id']);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../assets/css/styles.css">
-    <style>
-        .success-container {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            background-color: #ffffff;
-        }
-        .success-icon {
-            font-size: 5rem;
-            color: #28a745;
-            margin-bottom: 1rem;
-            display: block;
-            text-align: center;
-        }
-        .booking-details {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-        }
-        .booking-details h3 {
-            color: #0d6efd;
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
-        }
-        .btn-action {
-            margin-top: 1.5rem;
-            width: 100%;
-        }
-    </style>
 </head>
 <body>
     <?php require '../components/header.php'; ?>
 
-    <div class="success-container">
-        <i class="bi bi-check-circle-fill success-icon"></i>
-        <h1 class="text-center">Đặt phòng thành công!</h1>
-        <p class="text-center mb-4">Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi. Dưới đây là thông tin chi tiết về đặt phòng của bạn.</p>
-        
-        <div class="booking-details">
-            <h3>THÔNG TIN PHÒNG ĐÃ ĐƯỢC PHÂN CÔNG</h3>
-            <div class="row">
-                <div class="col-md-6">
-                    <p><strong>Mã phòng:</strong> <?php echo htmlspecialchars($booking_info['room_name'] ?? 'N/A'); ?></p>
-                    <p><strong>Tòa nhà:</strong> <?php echo htmlspecialchars($booking_info['building'] ?? 'N/A'); ?></p>
-                    <p><strong>Tầng:</strong> <?php echo htmlspecialchars($booking_info['floor'] ?? 'N/A'); ?></p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>Loại phòng:</strong> <?php echo htmlspecialchars($booking_info['room_type'] ?? 'N/A'); ?></p>
-                    <p><strong>Sức chứa:</strong> <?php echo htmlspecialchars($booking_info['capacity'] ?? 'N/A'); ?> người</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="booking-details">
-            <h3>THỜI GIAN ĐẶT PHÒNG</h3>
-            <div class="row">
-                <div class="col-md-6">
-                    <p><strong>Ngày:</strong> <?php echo date('d/m/Y', strtotime($booking_info['date'])); ?></p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>Thời gian:</strong> <?php echo date('H:i', strtotime($booking_info['start_time'])); ?> - <?php echo date('H:i', strtotime($booking_info['end_time'])); ?></p>
+    <div class="container mt-4">
+        <div class="success-container">
+            <i class="bi bi-check-circle-fill success-icon"></i>
+            <h1 class="text-center">Đặt phòng thành công!</h1>
+            <p class="text-center mb-4">Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi. Dưới đây là thông tin chi tiết về đặt phòng của bạn.</p>
+            
+            <div class="booking-details">
+                <h3>THÔNG TIN PHÒNG ĐÃ ĐƯỢC PHÂN CÔNG</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Mã phòng:</strong> <?php echo htmlspecialchars($booking_info['room_name'] ?? 'N/A'); ?></p>
+                        <p><strong>Tòa nhà:</strong> <?php echo htmlspecialchars($booking_info['building'] ?? 'N/A'); ?></p>
+                        <p><strong>Tầng:</strong> <?php echo htmlspecialchars($booking_info['floor'] ?? 'N/A'); ?></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Loại phòng:</strong> <?php echo htmlspecialchars($booking_info['room_type'] ?? 'N/A'); ?></p>
+                        <p><strong>Sức chứa:</strong> <?php echo htmlspecialchars($booking_info['capacity'] ?? 'N/A'); ?> người</p>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="text-center">
-            <p>Vui lòng lưu lại thông tin này để sử dụng khi check-in.</p>
-            <a href="booking-history.php" class="btn btn-primary btn-action">Xem lịch sử đặt phòng</a>
-            <a href="booking.php" class="btn btn-outline-primary btn-action mt-2">Đặt phòng khác</a>
+            
+            <div class="booking-details">
+                <h3>THỜI GIAN ĐẶT PHÒNG</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Ngày:</strong> <?php echo date('d/m/Y', strtotime($booking_info['date'])); ?></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Thời gian:</strong> <?php echo date('H:i', strtotime($booking_info['start_time'])); ?> - <?php echo date('H:i', strtotime($booking_info['end_time'])); ?></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <p>Vui lòng lưu lại thông tin này để sử dụng khi check-in.</p>
+                <a href="booking-history.php" class="btn btn-primary btn-action">Xem lịch sử đặt phòng</a>
+                <a href="booking.php" class="btn btn-outline-primary btn-action mt-2">Đặt phòng khác</a>
+            </div>
         </div>
     </div>
 

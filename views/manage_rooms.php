@@ -12,6 +12,19 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['user_type'] !== 'admin') {
 $db = new DbConnect();
 $conn = $db->connect();
 
+// Pagination setup
+$rooms_per_page = 10;
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+
+// Get total rooms count
+$total_stmt = $conn->prepare("SELECT COUNT(*) as total FROM rooms");
+$total_stmt->execute();
+$total_rooms = $total_stmt->get_result()->fetch_assoc()['total'];
+$total_pages = ceil($total_rooms / $rooms_per_page);
+
+// Calculate offset
+$offset = ($page - 1) * $rooms_per_page;
+
 $stmt = $conn->prepare("
     SELECT r.*, 
            rt.name as room_type_name,
@@ -19,7 +32,9 @@ $stmt = $conn->prepare("
     FROM rooms r
     LEFT JOIN room_types rt ON r.room_type_id = rt.id
     ORDER BY r.building, r.floor, r.name
+    LIMIT ? OFFSET ?
 ");
+$stmt->bind_param("ii", $rooms_per_page, $offset);
 $stmt->execute();
 $rooms = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
@@ -41,145 +56,7 @@ $room_types = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <!-- External CSS -->
     <link rel="stylesheet" href="../assets/css/styles.css">
-    <style>
-        .admin-container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-        .page-header {
-            background: url('../assets/img/admin-bg.jpg') no-repeat center;
-            background-size: cover;
-            padding: 3rem 0;
-            position: relative;
-            margin-bottom: 2rem;
-        }
-        .page-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-        }
-        .page-header h1 {
-            color: white;
-            position: relative;
-            text-align: center;
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin: 0;
-        }
-        .search-box {
-            margin-bottom: 2rem;
-            display: flex;
-            gap: 1rem;
-        }
-        .search-box input {
-            flex: 1;
-            padding: 0.5rem 1rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .table th {
-            background-color: #f8f9fa;
-            font-weight: 600;
-            text-align: center;
-            vertical-align: middle;
-        }
-        .table td {
-            vertical-align: middle;
-            text-align: center;
-        }
-        .status-active {
-            color: #28a745;
-            font-weight: 500;
-        }
-        .status-maintenance {
-            color: #ffc107;
-            font-weight: 500;
-        }
-        .status-inactive {
-            color: #dc3545;
-            font-weight: 500;
-        }
-        .btn-add-room {
-            background-color: #28a745;
-            color: white;
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .btn-add-room:hover {
-            background-color: #218838;
-        }
-        .equipment-status {
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.875rem;
-        }
-        .equipment-ok {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .equipment-issue {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        .equipment-missing {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .equipment-chip {
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.875rem;
-        }
-        .chip-ok {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .chip-warning {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        .chip-error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .pagination {
-            gap: 5px;
-        }
-        .pagination .page-item {
-            margin: 0;
-        }
-        .pagination .page-link {
-            border: 1px solid #dee2e6;
-            padding: 8px 12px;
-            color: #0d6efd;
-            background-color: #fff;
-        }
-        .pagination .page-item.active .page-link {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
-            color: #fff;
-        }
-        .pagination .page-item:first-child .page-link,
-        .pagination .page-item:last-child .page-link {
-            border-radius: 4px;
-        }
-        .pagination .page-link:hover {
-            background-color: #e9ecef;
-            border-color: #dee2e6;
-            color: #0a58ca;
-        }
-        .pagination .page-item.active .page-link:hover {
-            background-color: #0d6efd;
-            color: #fff;
-        }
-    </style>
+
 </head>
 <body>
     <?php require '../components/header.php'; ?>
@@ -219,7 +96,7 @@ $room_types = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                             'available' => 'status-active',
                                             'maintenance' => 'status-maintenance',
                                             'unavailable' => 'status-inactive',
-                                            default => ''
+                                            default => ''   
                                         };
                                         
                                         $status_text = match($room['status']) {
@@ -230,7 +107,7 @@ $room_types = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                         };
                                     ?>
                                     <tr>
-                                        <td><?php echo $index + 1; ?></td>
+                                        <td><?php echo ($offset + $index + 1); ?></td>
                                         <td><?php echo htmlspecialchars($room['name']); ?>
                                             <br>
                                             <small class="text-muted">
@@ -285,20 +162,18 @@ $room_types = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                         <!-- Simple Pagination -->
                         <nav aria-label="Page navigation" class="mt-4">
                             <ul class="pagination justify-content-center">
-                                <li class="page-item">
-                                    <a class="page-link" href="#" aria-label="Previous">
+                                <li class="page-item<?php if ($page <= 1) echo ' disabled'; ?>">
+                                    <a class="page-link" href="?page=<?php echo max(1, $page - 1); ?>" aria-label="Previous">
                                         <i class="bi bi-chevron-left"></i>
                                     </a>
                                 </li>
-                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                <li class="page-item disabled">
-                                    <span class="page-link">...</span>
-                                </li>
-                                <li class="page-item"><a class="page-link" href="#">72</a></li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#" aria-label="Next">
+                                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                                    <li class="page-item<?php if ($i == $page) echo ' active'; ?>">
+                                        <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                                    </li>
+                                <?php endfor; ?>
+                                <li class="page-item<?php if ($page >= $total_pages) echo ' disabled'; ?>">
+                                    <a class="page-link" href="?page=<?php echo min($total_pages, $page + 1); ?>" aria-label="Next">
                                         <i class="bi bi-chevron-right"></i>
                                     </a>
                                 </li>
@@ -443,7 +318,7 @@ $room_types = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 floor: document.getElementById('floor').value
             };
 
-            fetch('api/add_room.php', {
+            fetch('../api/add_room.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -525,7 +400,7 @@ $room_types = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         // Delete room function
         function deleteRoom(roomId) {
             if (confirm('Bạn có chắc chắn muốn xóa phòng này?')) {
-                fetch('api/delete_room.php', {
+                fetch('../api/delete_room.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

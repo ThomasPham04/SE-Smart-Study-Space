@@ -232,10 +232,42 @@ $available_rooms = $available_result['count'];
             // Convert to Date objects for comparison
             const startDateTime = new Date(startDate + 'T' + startTime);
             const endDateTime = new Date(startDate + 'T' + endTime);
-            
+            const now = new Date();
+
+            // Prevent end time before or equal to start time
             if (startDateTime >= endDateTime) {
                 e.preventDefault();
                 alert('Thời gian kết thúc phải sau thời gian bắt đầu!');
+                return;
+            }
+
+            // Prevent booking a time in the past for today
+            const today = now.toISOString().slice(0, 10);
+            if (startDate === today && startDateTime <= now) {
+                e.preventDefault();
+                alert('Không thể đặt phòng cho thời gian đã qua trong ngày hôm nay!');
+                return;
+            }
+        });
+
+        // Optionally, update min attribute for time inputs when date changes
+        document.getElementById('start_date').addEventListener('change', function() {
+            const selectedDate = this.value;
+            const now = new Date();
+            const today = now.toISOString().slice(0, 10);
+            const startTimeInput = document.getElementById('start_time');
+            if (selectedDate === today) {
+                // Set min time to now (rounded to next minute)
+                let minHour = now.getHours();
+                let minMinute = now.getMinutes() + 1;
+                if (minMinute >= 60) {
+                    minHour++;
+                    minMinute = 0;
+                }
+                const minTime = `${minHour.toString().padStart(2, '0')}:${minMinute.toString().padStart(2, '0')}`;
+                startTimeInput.min = minTime;
+            } else {
+                startTimeInput.removeAttribute('min');
             }
         });
     </script>

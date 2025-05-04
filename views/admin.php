@@ -125,7 +125,7 @@ $popular_rooms = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                             </div>
                         </div>
                         
-                        <!-- Quick Actions -->
+                        <!-- Quick Actions
                         <div class="row mt-4">
                             <div class="col-12">
                                 <h5 class="fw-bold">Thao tác nhanh</h5>
@@ -134,14 +134,14 @@ $popular_rooms = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                         <i class="bi bi-person-plus"></i> Thêm người dùng mới
                                     </a>
                                     <a href="manage_bookings.php" class="btn btn-success">
-                                        <i class="bi bi-calendar-plus"></i> Tạo đặt phòng mới
+                                        <i class="bi bi-calendar-plus"></i> Quản lý phòng
                                     </a>
                                     <a href="manage_rooms.php" class="btn btn-info text-white">
                                         <i class="bi bi-building-add"></i> Thêm phòng mới
                                     </a>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
                         <!-- Statistics Section -->
                         <div class="row mt-4">
