@@ -19,7 +19,7 @@
     session_start();
     date_default_timezone_set('Asia/Ho_Chi_Minh'); // Set timezone to Vietnam time
     require '../components/header.php';
-    require_once '../config/db_connection.php';
+    require_once '../classes/Student.php';
 
     // Check if user is logged in
     if (!isset($_SESSION['user'])) {
@@ -66,7 +66,8 @@
             header('Location: login.php');
             exit();
         }
-        $user_id = $_SESSION['user']['id'];
+        $user = $_SESSION['user'];
+        $student = new Student($user['id'], $user['name'], $user['user_type'], $user['username'] ?? null, $user['student_id'] ?? null, $user['phone_number'] ?? null);
 
         // Validate input
         if (empty($start_date) || empty($start_time) || empty($end_time)) {
@@ -105,40 +106,14 @@
         }
         // --- End Server-side Time Validation ---
 
-        // Check if room is available
-        $check_stmt = $conn->prepare("
-            SELECT COUNT(*) as count FROM bookings 
-            WHERE room_id = ? 
-            AND booking_date = ?
-            AND (
-                (start_time <= ? AND end_time >= ?) OR
-                (start_time <= ? AND end_time >= ?) OR
-                (start_time >= ? AND end_time <= ?)
-            )
-        ");
-        $check_stmt->bind_param("isssssss", $room_id, $start_date, $start_time, $start_time, $end_time, $end_time, $start_time, $end_time);
-        $check_stmt->execute();
-        $result = $check_stmt->get_result()->fetch_assoc();
-
-        if ($result['count'] > 0) {
-            $_SESSION['error'] = 'Phòng đã được đặt trong khoảng thời gian này!';
-            header('Location: booking-confirm.php?room_id=' . $room_id);
-            exit();
-        }
-
-        // Create booking
-        $insert_stmt = $conn->prepare("
-            INSERT INTO bookings (user_id, room_id, booking_date, start_time, end_time, status) 
-            VALUES (?, ?, ?, ?, ?, 'pending')
-        ");
-        $insert_stmt->bind_param("iisss", $user_id, $room_id, $start_date, $start_time, $end_time);
-        
-        if ($insert_stmt->execute()) {
+        // Use Student class to make reservation
+        $success = $student->makeReservation($room_id, $start_date, $start_time, $end_time);
+        if ($success) {
             $_SESSION['success'] = 'Đặt phòng thành công!';
             header('Location: booking-success.php');
             exit();
         } else {
-            $_SESSION['error'] = 'Có lỗi xảy ra khi đặt phòng: ' . $insert_stmt->error;
+            $_SESSION['error'] = 'Phòng đã được đặt trong khoảng thời gian này hoặc có lỗi xảy ra khi đặt phòng!';
             header('Location: booking-confirm.php?room_id=' . $room_id);
             exit();
         }

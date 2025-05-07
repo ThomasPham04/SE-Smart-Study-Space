@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../config/db_connection.php';
+require_once '../classes/Student.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user'])) {
@@ -22,7 +22,13 @@ if (!$booking_id) {
     exit();
 }
 
-// Get booking information
+$user = $_SESSION['user'];
+$student = new Student($user['id'], $user['name'], $user['user_type'], $user['username'] ?? null, $user['student_id'] ?? null, $user['phone_number'] ?? null);
+
+// Use Student class to check in (update status if possible)
+$success = $student->checkIn($booking_id);
+
+require_once '../config/db_connection.php';
 $db = new DbConnect();
 $conn = $db->connect();
 
@@ -31,10 +37,9 @@ $stmt = $conn->prepare("
     FROM bookings b
     JOIN rooms r ON b.room_id = r.id
     JOIN room_types rt ON r.room_type_id = rt.id
-    WHERE b.id = ? AND b.user_id = ? AND b.status = 'confirmed'
+    WHERE b.id = ? AND b.user_id = ?
 ");
-$user_id = $_SESSION['user']['id'];
-$stmt->bind_param("ii", $booking_id, $user_id);
+$stmt->bind_param("ii", $booking_id, $user['id']);
 $stmt->execute();
 $booking = $stmt->get_result()->fetch_assoc();
 
@@ -54,7 +59,7 @@ $qr_data = [
     'booking_id' => $booking_id,
     'access_code' => $access_code,
     'timestamp' => $current_time,
-    'user_id' => $user_id,
+    'user_id' => $user['id'],
     'csrf_token' => $_SESSION['csrf_token']
 ];
 

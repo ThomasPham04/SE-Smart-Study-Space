@@ -1,10 +1,36 @@
 <?php
 session_start();
 require_once '../config/db_connection.php';
+require_once '../classes/Admin.php';
 
 // Check if user is logged in and is admin
 if (!isset($_SESSION['user']) || $_SESSION['user']['user_type'] !== 'admin') {
     header('Location: login.php');
+    exit();
+}
+
+// Instantiate Admin class from session
+$user = $_SESSION['user'];
+$admin = new Admin($user['id'], $user['name'], $user['user_type'], $user['username'] ?? null, $user['id']);
+$adminProfile = $admin->getProfile();
+
+// Handle room update (from a POST form, not JS fetch)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editRoomId'])) {
+    $roomData = [
+        'id' => $_POST['editRoomId'],
+        'name' => $_POST['editRoomName'],
+        'building' => $_POST['editBuilding'],
+        'floor' => $_POST['editFloor'],
+        'capacity' => $_POST['editCapacity'] ?? 0,
+        'status' => $_POST['editStatus']
+    ];
+    $success = $admin->updateSpaceList($roomData);
+    if ($success) {
+        $_SESSION['success_message'] = 'Cập nhật phòng thành công!';
+    } else {
+        $_SESSION['error_message'] = 'Có lỗi xảy ra khi cập nhật phòng!';
+    }
+    header('Location: ' . $_SERVER['PHP_SELF']);
     exit();
 }
 

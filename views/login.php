@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../config/db_connection.php';
+require_once '../classes/User.php';
 
 // Redirect if already logged in
 if (isset($_SESSION['user'])) {
@@ -16,38 +16,16 @@ if (isset($_SESSION['user'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
-    $login_type = $_POST['login_type'] ?? ''; // Add login type to differentiate between admin and local
-    
+    $login_type = $_POST['login_type'] ?? '';
+
     if (!empty($username) && !empty($password)) {
-        $db = new DbConnect();
-        $conn = $db->connect();
-        
-        if ($login_type === 'admin') {
-            // Admin login - check for admin type specifically
-            $stmt = $conn->prepare("SELECT * FROM users WHERE username = ? AND password = ? AND user_type = 'admin'");
-            $stmt->bind_param("ss", $username, $password);
-        } else {
-            // Local user login - check for non-admin users
-            $stmt = $conn->prepare("SELECT * FROM users WHERE username = ? AND password = ? AND user_type != 'admin'");
-            $stmt->bind_param("ss", $username, $password);
-        }
-        
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $user = $result->fetch_assoc();
-        
-        if ($user) {
-            $_SESSION['user'] = [
-                'id' => $user['id'],
-                'name' => $user['name'],
-                'user_type' => $user['user_type']
-            ];
-            
-            if ($user['user_type'] === 'admin') {
+        $userObj = new User();
+        if ($userObj->login($username, $password, $login_type)) {
+            if ($_SESSION['user']['user_type'] === 'admin') {
                 header('Location: admin.php');
             } else {
                 $redirect = $_SESSION['redirect_after_login'] ?? '../index.php';
-                unset($_SESSION['redirect_after_login']); // Clear the stored redirect
+                unset($_SESSION['redirect_after_login']);
                 header('Location: ' . $redirect);
             }
             exit();

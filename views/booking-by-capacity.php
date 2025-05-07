@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../classes/Student.php';
 require_once '../config/db_connection.php';
 
 // Check if user is logged in
@@ -46,7 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: login.php');
         exit();
     }
-    $user_id = $_SESSION['user']['id'];
+    $user = $_SESSION['user'];
+    $student = new Student($user['id'], $user['name'], $user['user_type'], $user['username'] ?? null, $user['student_id'] ?? null, $user['phone_number'] ?? null);
 
     // Validate input
     if (empty($start_date) || empty($start_time) || empty($end_time)) {
@@ -92,14 +94,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     $room_id = $result['id'];
     
-    // Create booking
-    $insert_stmt = $conn->prepare("
-        INSERT INTO bookings (user_id, room_id, booking_date, start_time, end_time, status) 
-        VALUES (?, ?, ?, ?, ?, 'pending')
-    ");
-    $insert_stmt->bind_param("iisss", $user_id, $room_id, $start_date, $start_time, $end_time);
-    
-    if ($insert_stmt->execute()) {
+    // Use Student class to make reservation
+    $success = $student->makeReservation($room_id, $start_date, $start_time, $end_time);
+    if ($success) {
         // Store the booking information for the success page
         $_SESSION['booking_info'] = [
             'room_id' => $room_id,
@@ -113,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: booking-success.php');
         exit();
     } else {
-        $_SESSION['error'] = 'Có lỗi xảy ra khi đặt phòng: ' . $insert_stmt->error;
+        $_SESSION['error'] = 'Có lỗi xảy ra khi đặt phòng hoặc phòng đã được đặt trong khoảng thời gian này!';
         header('Location: booking-by-capacity.php?type_id=' . $type_id . (!empty($building) ? '&building=' . urlencode($building) : ''));
         exit();
     }

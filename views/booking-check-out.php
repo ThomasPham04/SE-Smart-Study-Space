@@ -1,6 +1,7 @@
 <?php
 // Start session
 session_start();
+require_once '../classes/Student.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user'])) {
@@ -17,51 +18,26 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
     exit;
 }
 
-// Include database connection
-require_once '../config/db_connection.php';
-
-// Get booking ID
 $bookingId = $_GET['id'];
-$userId = $_SESSION['user']['id'];
+$user = $_SESSION['user'];
+$student = new Student($user['id'], $user['name'], $user['user_type'], $user['username'] ?? null, $user['student_id'] ?? null, $user['phone_number'] ?? null);
 
-try {
-    // Verify that the booking belongs to the current user and is in 'checked_in' status
-    $query = "SELECT b.*, r.name as room_name FROM bookings b 
-              JOIN rooms r ON b.room_id = r.id 
-              WHERE b.id = ? AND b.user_id = ? AND b.status = 'checked_in'";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("ii", $bookingId, $userId);
+// Use Student class to check out
+$success = $student->checkOut($bookingId);
+
+if ($success) {
+    // Optionally, you can fetch the room name for the success message if needed
+    require_once '../config/db_connection.php';
+    $db = new DbConnect();
+    $conn = $db->connect();
+    $stmt = $conn->prepare("SELECT r.name as room_name FROM bookings b JOIN rooms r ON b.room_id = r.id WHERE b.id = ?");
+    $stmt->bind_param("i", $bookingId);
     $stmt->execute();
-    $result = $stmt->get_result();
-    $booking = $result->fetch_assoc();
-    
-    if (!$booking) {
-        // Booking not found, not owned by user, or not in 'checked_in' status
-        $_SESSION['error'] = "Không tìm thấy thông tin đặt phòng đã check-in hoặc bạn không có quyền truy cập";
-        header('Location: booking-history.php');
-        $stmt->close();
-        exit;
-    }
-    $stmt->close();
-    
-    // Update booking status to 'completed'
-    $updateQuery = "UPDATE bookings SET status = 'completed', checkout_time = NOW() WHERE id = ?";
-    $updateStmt = $conn->prepare($updateQuery);
-    $updateStmt->bind_param("i", $bookingId);
-    $updateStmt->execute();
-    
-    // Check if update was successful
-    if ($updateStmt->affected_rows > 0) {
-        $_SESSION['success_message'] = "Bạn đã check-out khỏi phòng " . htmlspecialchars($booking['room_name']) . " thành công. Cảm ơn bạn đã sử dụng dịch vụ!";
-    } else {
-        $_SESSION['error'] = "Không thể check-out. Vui lòng thử lại.";
-    }
-    $updateStmt->close();
-    
-} catch (Exception $e) {
-    // Log error and display message
-    error_log("Database error: " . $e->getMessage());
-    $_SESSION['error'] = "Đã xảy ra lỗi khi xử lý check-out. Vui lòng thử lại sau.";
+    $result = $stmt->get_result()->fetch_assoc();
+    $room_name = $result['room_name'] ?? '';
+    $_SESSION['success_message'] = "Bạn đã check-out khỏi phòng " . htmlspecialchars($room_name) . " thành công. Cảm ơn bạn đã sử dụng dịch vụ!";
+} else {
+    $_SESSION['error'] = "Không thể check-out. Vui lòng thử lại hoặc bạn không có quyền check-out.";
 }
 
 // Redirect back to booking history page

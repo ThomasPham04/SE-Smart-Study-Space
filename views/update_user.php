@@ -1,12 +1,18 @@
 <?php
 session_start();
 require_once '../config/db_connection.php';
+require_once '../classes/Admin.php';
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['user']) || $_SESSION['user']['user_type'] !== 'admin') {
     header('Location: login.php');
     exit();
 }
+
+// Instantiate Admin class from session
+$user = $_SESSION['user'];
+$admin = new Admin($user['id'], $user['name'], $user['user_type'], $user['username'] ?? null, $user['id']);
+$adminProfile = $admin->getProfile();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = $_POST['user_id'] ?? '';

@@ -19,10 +19,12 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 
 // Include database connection
 require_once '../config/db_connection.php';
+require_once '../classes/Student.php';
 
 // Get booking ID
 $bookingId = $_GET['id'];
-$userId = $_SESSION['user']['id'];
+$user = $_SESSION['user'];
+$student = new Student($user['id'], $user['name'], $user['user_type'], $user['username'] ?? null, $user['student_id'] ?? null, $user['phone_number'] ?? null);
 
 // Establish database connection *before* any conditional logic
 $db = new DbConnect();
@@ -41,24 +43,19 @@ if (!$conn) {
 // If we're already processing a form submission for cancellation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_cancel'])) {
     try {
-        // Verify that the booking belongs to the current user and is in 'confirmed' or 'pending' status
-        $query = "SELECT b.*, r.name as room_name FROM bookings b 
-                JOIN rooms r ON b.room_id = r.id 
-                WHERE b.id = ? AND b.user_id = ? AND (b.status = 'confirmed' OR b.status = 'pending')"; // Allow cancelling pending too
-        $stmt = $conn->prepare($query);
-        $stmt->bind_param("ii", $bookingId, $userId); // Use mysqli bind_param
+        // Fetch booking info for time check
+        $stmt = $conn->prepare("SELECT * FROM bookings WHERE id = ? AND user_id = ? AND (status = 'confirmed' OR status = 'pending')");
+        $stmt->bind_param("ii", $bookingId, $user['id']);
         $stmt->execute();
-        $result = $stmt->get_result(); // Get mysqli result
-        $booking = $result->fetch_assoc(); // Fetch using mysqli
+        $booking = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
         
         if (!$booking) {
             // Booking not found, not owned by user, or not in a cancellable status
             $_SESSION['error'] = "Không tìm thấy thông tin đặt phòng hoặc phòng không ở trạng thái có thể hủy"; // Updated error message
             header('Location: booking-history.php');
-            $stmt->close(); // Close statement
             exit;
         }
-        $stmt->close(); // Close statement
         
         // Additional check: Don't allow cancellations too close to the booking time
         $bookingStartTime = strtotime($booking['booking_date'] . ' ' . $booking['start_time']);
@@ -72,19 +69,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_cancel'])) {
             exit;
         }
         
-        // Update booking status to 'cancelled'
-        $updateQuery = "UPDATE bookings SET status = 'cancelled', cancelled_at = NOW() WHERE id = ?";
-        $updateStmt = $conn->prepare($updateQuery);
-        $updateStmt->bind_param("i", $bookingId); // Use mysqli bind_param
-        $updateStmt->execute();
+        // Use Student class to cancel reservation
+        $success = $student->cancelReservation($bookingId);
         
-        // Check if update was successful
-        if ($updateStmt->affected_rows > 0) { // Use mysqli affected_rows
+        if ($success) {
             $_SESSION['success_message'] = "Bạn đã hủy đặt phòng " . htmlspecialchars($booking['room_name']) . " thành công";
         } else {
             $_SESSION['error'] = "Không thể hủy đặt phòng. Vui lòng thử lại.";
         }
-        $updateStmt->close(); // Close statement
         
         // Redirect back to booking history page after cancellation
         header('Location: booking-history.php');
@@ -102,16 +94,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_cancel'])) {
 // If we're just displaying the cancellation form, get the booking details
 try {
     // Get the booking details for display - Allow fetching pending or confirmed
-    $query = "SELECT b.*, r.name as room_name, r.building, r.floor 
-            FROM bookings b 
-            JOIN rooms r ON b.room_id = r.id 
-            WHERE b.id = ? AND b.user_id = ? AND (b.status = 'confirmed' OR b.status = 'pending')"; // Allow showing pending too
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("ii", $bookingId, $userId); // Use mysqli bind_param
+    $stmt = $conn->prepare("SELECT b.*, r.name as room_name, r.building, r.floor FROM bookings b JOIN rooms r ON b.room_id = r.id WHERE b.id = ? AND b.user_id = ? AND (b.status = 'confirmed' OR b.status = 'pending')");
+    $stmt->bind_param("ii", $bookingId, $user['id']);
     $stmt->execute();
-    $result = $stmt->get_result(); // Get mysqli result
-    $booking = $result->fetch_assoc(); // Fetch using mysqli
-    $stmt->close(); // Close statement
+    $booking = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
     
     if (!$booking) {
         // Booking not found, not owned by user, or not in a cancellable status
