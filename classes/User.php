@@ -4,8 +4,10 @@ class User {
     protected $role;
     protected $id;
     protected $username;
+    protected $conn;
 
-    public function __construct($id = null, $fullName = null, $role = null, $username = null) {
+    public function __construct($conn, $id = null, $fullName = null, $role = null, $username = null) {
+        $this->conn = $conn;
         $this->id = $id;
         $this->fullName = $fullName;
         $this->role = $role;
@@ -13,14 +15,10 @@ class User {
     }
 
     public function login($username, $password, $login_type) {
-        require_once __DIR__ . '/../config/db_connection.php';
-        $db = new DbConnect();
-        $conn = $db->connect();
-
         if ($login_type === 'admin') {
-            $stmt = $conn->prepare("SELECT * FROM users WHERE username = ? AND password = ? AND user_type = 'admin'");
+            $stmt = $this->conn->prepare("SELECT * FROM users WHERE username = ? AND password = ? AND user_type = 'admin'");
         } else {
-            $stmt = $conn->prepare("SELECT * FROM users WHERE username = ? AND password = ? AND user_type != 'admin'");
+            $stmt = $this->conn->prepare("SELECT * FROM users WHERE username = ? AND password = ? AND user_type != 'admin'");
         }
         $stmt->bind_param("ss", $username, $password);
         $stmt->execute();
@@ -54,6 +52,46 @@ class User {
             'role' => $this->role,
             'username' => $this->username
         ];
+    }
+
+    public function getUserByUsername($username) {
+        $stmt = $this->conn->prepare("SELECT * FROM users WHERE username = ?");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc();
+    }
+
+    public function createUserFromSSO($userData) {
+        $stmt = $this->conn->prepare("INSERT INTO users (username, password, name, email, user_type) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssss", 
+            $userData['username'],
+            $userData['password'],
+            $userData['full_name'],
+            $userData['email'],
+            $userData['user_type']
+        );
+        
+        if ($stmt->execute()) {
+            $user_id = $this->conn->insert_id;
+            return $this->getUserByUsername($userData['username']);
+        }
+        return null;
+    }
+
+    public function loginWithSSO($username) {
+        $user = $this->getUserByUsername($username);
+        if ($user) {
+            $_SESSION['user'] = [
+                'id' => $user['id'],
+                'username' => $user['username'],
+                'name' => $user['name'],
+                'email' => $user['email'],
+                'user_type' => $user['user_type']
+            ];
+            return true;
+        }
+        return false;
     }
 }
 

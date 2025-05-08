@@ -1,11 +1,15 @@
 <?php
 session_start();
+require_once '../config/db_connection.php';
 require_once '../classes/User.php';
+
+$db = new DbConnect();
+$conn = $db->connect();
 
 // Redirect if already logged in
 if (isset($_SESSION['user'])) {
     if ($_SESSION['user']['user_type'] === 'admin') {
-        header('Location: admin.php');
+        header('Location: admin/admin.php');
     } else {
         header('Location: ' . ($_SESSION['redirect_after_login'] ?? '../index.php'));
     }
@@ -19,10 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $login_type = $_POST['login_type'] ?? '';
 
     if (!empty($username) && !empty($password)) {
-        $userObj = new User();
+        $userObj = new User($conn);
         if ($userObj->login($username, $password, $login_type)) {
             if ($_SESSION['user']['user_type'] === 'admin') {
-                header('Location: admin.php');
+                header('Location: admin/admin.php');
             } else {
                 $redirect = $_SESSION['redirect_after_login'] ?? '../index.php';
                 unset($_SESSION['redirect_after_login']);
@@ -69,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?php endif; ?>
                             
                             <div class="d-grid gap-3">
-                                <a href="https://sso.hcmut.edu.vn/cas/login" target="_blank" class="btn btn-outline-primary p-3 role-option">
+                                <a href="mybk_login.php" class="btn btn-outline-primary p-3 role-option">
                                     <div class="d-flex align-items-center justify-content-center">
                                         <i class="bi bi-mortarboard-fill me-2 fs-4"></i>
                                         <h3 class="mb-0">Sinh viên trường Đại học Bách Khoa (HCMUT)</h3>

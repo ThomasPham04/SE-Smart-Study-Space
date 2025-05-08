@@ -1,7 +1,16 @@
 <?php
 // Define base path
 $isInViews = strpos($_SERVER['REQUEST_URI'], '/views/') !== false;
-$basePath = $isInViews ? '../' : '';
+$isInStudent = strpos($_SERVER['REQUEST_URI'], '/views/student/') !== false;
+$isInAdmin = strpos($_SERVER['REQUEST_URI'], '/views/admin/') !== false;
+
+if ($isInStudent || $isInAdmin) {
+    $basePath = '../../';
+} elseif ($isInViews) {
+    $basePath = '../';
+} else {
+    $basePath = '';
+}
 ?>
 <!-- Footer -->
 <footer class="footer">

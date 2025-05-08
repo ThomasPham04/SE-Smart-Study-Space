@@ -20,11 +20,11 @@ require_once __DIR__ . '/../config/config.php';
                     <a class="nav-link" href="<?php echo BASE_URL; ?>index.php">Trang chủ</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo BASE_URL; ?>views/booking.php">Đặt chỗ</a>
+                    <a class="nav-link" href="<?php echo BASE_URL; ?>views/student/booking.php">Đặt chỗ</a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" href="<?php echo BASE_URL; ?>views/contact.php">Liên hệ</a>
-                </li>
+                </li> -->
                 <?php if (isset($_SESSION['user'])): ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
@@ -33,11 +33,11 @@ require_once __DIR__ . '/../config/config.php';
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <?php if ($_SESSION['user']['user_type'] === 'admin'): ?>
-                                <li><a class="dropdown-item" href="<?php echo BASE_URL; ?>views/admin.php">
+                                <li><a class="dropdown-item" href="<?php echo BASE_URL; ?>views/admin/admin.php">
                                     <i class="bi bi-speedometer2 me-2"></i>Dashboard
                                 </a></li>
                             <?php else: ?>
-                                <li><a class="dropdown-item" href="<?php echo BASE_URL; ?>views/booking-history.php">
+                                <li><a class="dropdown-item" href="<?php echo BASE_URL; ?>views/student/booking-history.php">
                                     <i class="bi bi-clock-history me-2"></i>Lịch sử đặt phòng
                                 </a></li>
                             <?php endif; ?>

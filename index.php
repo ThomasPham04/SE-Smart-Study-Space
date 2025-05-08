@@ -16,6 +16,31 @@ require_once 'config/db_connection.php';
 //     LEFT JOIN bookings b ON r.room_id = b.room_id 
 //     WHERE b.status IS NULL OR b.status != 'Quá hạn'
 // ")->fetchAll(PDO::FETCH_ASSOC);
+
+// Get the controller and action from URL
+$controller = isset($_GET['controller']) ? $_GET['controller'] : 'home';
+$action = isset($_GET['action']) ? $_GET['action'] : 'index';
+
+// Load the appropriate controller
+$controllerFile = 'controllers/' . ucfirst($controller) . 'Controller.php';
+if (file_exists($controllerFile)) {
+    require_once $controllerFile;
+    $controllerClass = ucfirst($controller) . 'Controller';
+    $controllerInstance = new $controllerClass();
+    
+    // Call the appropriate action
+    if (method_exists($controllerInstance, $action)) {
+        $controllerInstance->$action();
+    } else {
+        // Handle 404 - Action not found
+        header("HTTP/1.0 404 Not Found");
+        echo "Action not found";
+    }
+} else {
+    // Handle 404 - Controller not found
+    header("HTTP/1.0 404 Not Found");
+    echo "Controller not found";
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">

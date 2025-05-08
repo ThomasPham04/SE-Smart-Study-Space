@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS room_types (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Equipment table
+-- Equipment s
 CREATE TABLE IF NOT EXISTS equipment (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
