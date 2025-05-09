@@ -114,7 +114,7 @@ class Admin extends User {
      * Delete a user's booking
      */
     public function deleteUserBooking($userID, $reservationID) {
-        $stmt = $this->conn->prepare("DELETE FROM bookings WHERE id = ? AND user_id = ?");
+        $stmt = $this->conn->prepare("UPDATE bookings SET status = 'cancelled', cancelled_at = NOW() WHERE id = ? AND user_id = ?");
         $stmt->bind_param("ii", $reservationID, $userID);
         return $stmt->execute();
     }
@@ -135,6 +135,11 @@ class Admin extends User {
                 break;
             case 'delete':
                 if (!$userID) return false;
+                // Xóa tất cả booking của user trước
+                $delBookings = $this->conn->prepare("DELETE FROM bookings WHERE user_id = ?");
+                $delBookings->bind_param("i", $userID);
+                $delBookings->execute();
+                // Sau đó mới xóa user
                 $stmt = $this->conn->prepare("DELETE FROM users WHERE id = ?");
                 $stmt->bind_param("i", $userID);
                 break;

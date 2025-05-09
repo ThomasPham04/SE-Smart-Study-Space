@@ -153,7 +153,7 @@ $buildings = $building_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                 <div class="card room-type-card position-relative">
                                     <img src="../../assets/img/Card.png" alt="<?php echo htmlspecialchars($type['name']); ?>" class="card-img-top">
                                     <span class="card-badge <?php echo $type['available_rooms'] ? '' : 'unavailable'; ?>">
-                                        <?php echo $type['available_rooms'] ? $type['available_rooms'] . ' phòng trống' : 'Hết phòng'; ?>
+                                        <?php echo $type['available_rooms'] ? $type['available_rooms'] . ' phòng' : 'Hết phòng'; ?>
                                     </span>
                                     <div class="card-body">
                                         <h5 class="card-title"><?php echo htmlspecialchars($type['name']); ?></h5>

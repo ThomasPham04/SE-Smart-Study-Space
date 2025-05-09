@@ -33,20 +33,19 @@ $stmt->execute();
 $stats['total_rooms'] = $stmt->get_result()->fetch_assoc()['total'];
 
 // Today's bookings
-$stmt = $conn->prepare("SELECT COUNT(*) as total FROM bookings WHERE DATE(booking_date) = CURDATE()");
+$stmt = $conn->prepare("SELECT COUNT(*) as total FROM bookings WHERE DATE(start_time) = CURDATE()");
 $stmt->execute();
 $stats['today_bookings'] = $stmt->get_result()->fetch_assoc()['total'];
 
-// Get booking statistics for the last 7 days
+// Thống kê tổng số lượt đặt phòng mỗi ngày trong 7 ngày qua
 $stmt = $conn->prepare("
     SELECT 
-        DATE(booking_date) as date,
-        COUNT(*) as count,
-        status
-    FROM bookings 
-    WHERE booking_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
-    GROUP BY DATE(booking_date), status
-    ORDER BY date DESC
+        DATE(start_time) as date,
+        COUNT(*) as count
+    FROM bookings
+    WHERE start_time >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+    GROUP BY DATE(start_time)
+    ORDER BY date ASC
 ");
 $stmt->execute();
 $booking_stats = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -58,7 +57,7 @@ $stmt = $conn->prepare("
         COUNT(*) as booking_count
     FROM bookings b
     JOIN rooms r ON b.room_id = r.id
-    WHERE b.booking_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+    WHERE b.start_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
     GROUP BY r.id
     ORDER BY booking_count DESC
     LIMIT 5
@@ -188,27 +187,20 @@ $popular_rooms = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Initialize booking trends chart
         const bookingData = <?php echo json_encode($booking_stats); ?>;
-        const dates = [...new Set(bookingData.map(item => item.date))];
-        const statuses = [...new Set(bookingData.map(item => item.status))];
-        
-        const datasets = statuses.map(status => ({
-            label: status === 'pending' ? 'Chờ duyệt' :
-                   status === 'approved' ? 'Đã duyệt' :
-                   status === 'rejected' ? 'Từ chối' :
-                   status === 'completed' ? 'Hoàn thành' : status,
-            data: dates.map(date => {
-                const entry = bookingData.find(item => item.date === date && item.status === status);
-                return entry ? entry.count : 0;
-            }),
-            borderColor: status === 'pending' ? '#ffc107' :
-                        status === 'approved' ? '#28a745' :
-                        status === 'rejected' ? '#dc3545' :
-                        status === 'completed' ? '#17a2b8' : '#6c757d',
-            fill: false
-        }));
-
+        // Lấy danh sách ngày (7 ngày gần nhất)
+        const today = new Date();
+        const dates = [];
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - i);
+            dates.push(d.toISOString().slice(0, 10));
+        }
+        // Tạo mảng số lượt đặt cho từng ngày
+        const dataCounts = dates.map(date => {
+            const entry = bookingData.find(item => item.date === date);
+            return entry ? entry.count : 0;
+        });
         new Chart(document.getElementById('bookingTrendsChart'), {
             type: 'line',
             data: {
@@ -216,7 +208,14 @@ $popular_rooms = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     const d = new Date(date);
                     return d.getDate() + '/' + (d.getMonth() + 1);
                 }),
-                datasets: datasets
+                datasets: [{
+                    label: 'Số lượt đặt phòng',
+                    data: dataCounts,
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0,123,255,0.1)',
+                    fill: true,
+                    tension: 0.2
+                }]
             },
             options: {
                 responsive: true,

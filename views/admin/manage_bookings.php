@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Ho_Chi_Minh');
 session_start();
 require_once '../../config/db_connection.php';
 require_once '../../classes/Admin.php';
@@ -56,15 +57,15 @@ $bookings_page = array_slice($bookings, $offset, $bookings_per_page);
     <title>Quản lý đặt phòng - BKSpace</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="/assets/css/styles.css" rel="stylesheet">
+    <link href="../../assets/css/styles.css" rel="stylesheet">
 </head>
 <body>
-    <?php include '../components/header.php'; ?>
+    <?php include __DIR__ . '/../../components/header.php'; ?>
 
     <div class="container mt-4">
         <div class="row">
             <div class="col-md-3">
-                <?php include '../components/admin_menu.php'; ?>
+                <?php include __DIR__ . '/../../components/admin_menu.php'; ?>
             </div>
             <div class="col-md-9">
                 <div class="card">
@@ -98,6 +99,7 @@ $bookings_page = array_slice($bookings, $offset, $bookings_per_page);
                                         <th>Phòng</th>
                                         <th>Ngày</th>
                                         <th>Thời gian</th>
+                                        <th>Trạng thái</th>
                                         <th>Thao tác</th>
                                     </tr>
                                 </thead>
@@ -112,13 +114,46 @@ $bookings_page = array_slice($bookings, $offset, $bookings_per_page);
                                                    date('H:i', strtotime($booking['end_time'])); ?></td>
                                         <td>
                                             <?php
+                                            $status = $booking['status'];
+                                            $status_text = '';
+                                            $status_class = '';
+                                            switch ($status) {
+                                                case 'cancelled':
+                                                    $status_text = 'Đã hủy';
+                                                    $status_class = 'badge bg-danger';
+                                                    break;
+                                                case 'completed':
+                                                    $status_text = 'Đã hoàn thành';
+                                                    $status_class = 'badge bg-secondary';
+                                                    break;
+                                                case 'checked_in':
+                                                    $status_text = 'Đang sử dụng';
+                                                    $status_class = 'badge bg-info';
+                                                    break;
+                                                case 'pending':
+                                                    $status_text = 'Đang chờ';
+                                                    $status_class = 'badge bg-warning text-dark';
+                                                    break;
+                                                case 'confirmed':
+                                                default:
+                                                    $status_text = 'Đã xác nhận';
+                                                    $status_class = 'badge bg-success';
+                                                    break;
+                                            }
+                                            ?>
+                                            <span class="<?php echo $status_class; ?>"><?php echo $status_text; ?></span>
+                                        </td>
+                                        <td>
+                                            <?php
                                             $booking_datetime = strtotime($booking['booking_date'] . ' ' . $booking['end_time']);
                                             $current_datetime = time();
                                             $is_booking_passed = $booking_datetime < $current_datetime;
+                                            $is_booking_cancelled = in_array($booking['status'], ['cancelled', 'completed']);
+                                            $disable_button = $is_booking_passed || $is_booking_cancelled;
                                             ?>
-                                            <form method="POST" action="/admin/manage-bookings" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đặt phòng này?');">
+                                            <form method="POST" action="" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đặt phòng này?');">
                                                 <input type="hidden" name="delete_id" value="<?php echo $booking['id']; ?>">
-                                                <button type="submit" class="btn btn-danger btn-sm" <?php echo $is_booking_passed ? 'disabled' : ''; ?>>
+                                                <button type="submit" class="btn btn-danger btn-sm" <?php echo $disable_button ? 'disabled' : ''; ?>>
                                                     <i class="bi bi-trash"></i> Hủy
                                                 </button>
                                             </form>
@@ -156,7 +191,7 @@ $bookings_page = array_slice($bookings, $offset, $bookings_per_page);
         </div>
     </div>
 
-    <?php include '../components/footer.php'; ?>
+    <?php include __DIR__ . '/../../components/footer.php'; ?>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

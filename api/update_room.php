@@ -21,6 +21,15 @@ if (!isset($data['id']) || !isset($data['name']) || !isset($data['room_type_id']
     exit();
 }   
 
+// Additional check for empty values
+foreach (['id', 'name', 'room_type_id', 'building', 'floor', 'status', 'equipment_status'] as $field) {
+    if ($data[$field] === '' || $data[$field] === null) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Missing or empty field: ' . $field]);
+        exit();
+    }
+}
+
 try {
     $db = new DbConnect();
     $conn = $db->connect();
@@ -39,7 +48,7 @@ try {
     ");
 
     $stmt->bind_param(
-        "sissssi",
+        "sisissi",
         $data['name'],
         $data['room_type_id'],
         $data['building'],

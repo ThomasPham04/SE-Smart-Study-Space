@@ -416,6 +416,36 @@ $bookings_page = array_slice($bookings, $offset, $bookings_per_page);
         updateBookingStatusUI();
         // Optionally, update every minute
         setInterval(updateBookingStatusUI, 60000);
+
+        // Xử lý sự kiện HỦY PHÒNG
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('btn-cancel') && !e.target.disabled) {
+                e.preventDefault();
+                if (!confirm('Bạn có chắc chắn muốn hủy phòng này?')) return;
+                const row = e.target.closest('tr[data-booking-id]');
+                const bookingId = row.getAttribute('data-booking-id');
+                fetch('../../api/cancel-booking.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ booking_id: bookingId })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        // Cập nhật giao diện
+                        row.querySelector('.status-cell').textContent = 'Đã hủy';
+                        row.querySelector('.status-cell').className = 'status-cell status-cancelled';
+                        e.target.disabled = true;
+                        // Disable các nút khác
+                        row.querySelectorAll('button').forEach(btn => btn.disabled = true);
+                        alert('Đã hủy phòng thành công!');
+                    } else {
+                        alert('Hủy phòng thất bại: ' + (data.message || 'Lỗi không xác định'));
+                    }
+                })
+                .catch(() => alert('Không thể kết nối tới máy chủ!'));
+            }
+        });
     </script>
 </body>
 </html> 

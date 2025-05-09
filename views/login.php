@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?php endif; ?>
                             
                             <div class="d-grid gap-3">
-                                <a href="mybk_login.php" class="btn btn-outline-primary p-3 role-option">
+                                <a href="https://sso.hcmut.edu.vn/cas/login " class="btn btn-outline-primary p-3 role-option">
                                     <div class="d-flex align-items-center justify-content-center">
                                         <i class="bi bi-mortarboard-fill me-2 fs-4"></i>
                                         <h3 class="mb-0">Sinh viên trường Đại học Bách Khoa (HCMUT)</h3>

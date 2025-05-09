@@ -135,7 +135,10 @@ $rooms = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                     ?>
                                     <tr>
                                         <td><?php echo ($offset + $index + 1); ?></td>
-                                        <td><?php echo htmlspecialchars($room['name']); ?>
+                                        <td data-room-name="<?php echo htmlspecialchars($room['name']); ?>"
+                                            data-building="<?php echo htmlspecialchars($room['building']); ?>"
+                                            data-floor="<?php echo $room['floor']; ?>">
+                                            <?php echo htmlspecialchars($room['name']); ?>
                                             <br>
                                             <small class="text-muted">
                                                 <?php echo htmlspecialchars($room['building']) . ' - Tầng ' . $room['floor']; ?>
@@ -171,8 +174,7 @@ $rooms = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                         </td>
                                         <td>
                                             <button class="btn btn-sm btn-primary me-1" title="Chỉnh sửa" 
-                                                    data-bs-toggle="modal" data-bs-target="#editRoomModal" 
-                                                    data-room-id="<?php echo $room['id']; ?>">
+                                                    onclick="editRoom(<?php echo htmlspecialchars(json_encode($room)); ?>)">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
                                             <button class="btn btn-sm btn-danger" title="Xóa" 
@@ -366,42 +368,45 @@ $rooms = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             });
         }
 
-        // Edit room button handler
-        document.querySelectorAll('.btn-primary').forEach(button => {
-            button.addEventListener('click', function() {
-                const roomId = this.getAttribute('data-room-id');
-                const row = this.closest('tr');
-                
-                // Get room data from the row
-                const roomName = row.querySelector('td:nth-child(2)').textContent.trim().split('\n')[0];
-                const building = row.querySelector('td:nth-child(2) small').textContent.split('-')[0].trim();
-                const floor = parseInt(row.querySelector('td:nth-child(2) small').textContent.split('Tầng')[1]);
-                const roomType = row.querySelector('td:nth-child(3)').getAttribute('data-room-type-id');
-                const status = row.querySelector('td:nth-child(4)').getAttribute('data-status');
-                const equipmentStatus = row.querySelector('td:nth-child(5) span').textContent;
-
-                // Populate edit modal
-                document.getElementById('editRoomId').value = roomId;
-                document.getElementById('editRoomName').value = roomName;
-                document.getElementById('editRoomType').value = roomType;
-                document.getElementById('editBuilding').value = building;
-                document.getElementById('editFloor').value = floor;
-                document.getElementById('editStatus').value = status;
-                document.getElementById('editEquipmentStatus').value = equipmentStatus;
-            });
-        });
+        // Edit room function
+        function editRoom(room) {
+            document.getElementById('editRoomId').value = room.id;
+            document.getElementById('editRoomName').value = room.name;
+            document.getElementById('editRoomType').value = room.room_type_id;
+            document.getElementById('editBuilding').value = room.building;
+            document.getElementById('editFloor').value = room.floor;
+            document.getElementById('editStatus').value = room.status;
+            document.getElementById('editEquipmentStatus').value = room.equipment_status;
+            
+            new bootstrap.Modal(document.getElementById('editRoomModal')).show();
+        }
 
         // Update room function
         function updateRoom() {
             const formData = {
-                id: document.getElementById('editRoomId').value,
+                id: parseInt(document.getElementById('editRoomId').value, 10),
                 name: document.getElementById('editRoomName').value,
-                room_type_id: document.getElementById('editRoomType').value,
+                room_type_id: parseInt(document.getElementById('editRoomType').value, 10),
                 building: document.getElementById('editBuilding').value,
-                floor: document.getElementById('editFloor').value,
+                floor: parseInt(document.getElementById('editFloor').value, 10),
                 status: document.getElementById('editStatus').value,
                 equipment_status: document.getElementById('editEquipmentStatus').value
             };
+            console.log('Form data:', formData); // Debug log
+
+            // Improved validation logic
+            if (
+                isNaN(formData.id) ||
+                formData.name.trim() === '' ||
+                isNaN(formData.room_type_id) ||
+                formData.building.trim() === '' ||
+                isNaN(formData.floor) ||
+                formData.status.trim() === '' ||
+                formData.equipment_status.trim() === ''
+            ) {
+                alert('Vui lòng điền đầy đủ thông tin các trường!');
+                return;
+            }
 
             fetch('../../api/update_room.php', {
                 method: 'POST',
@@ -412,6 +417,7 @@ $rooms = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             })
             .then(response => response.json())
             .then(data => {
+                console.log('Update room response:', data); // For debugging
                 if (data.success) {
                     location.reload();
                 } else {
