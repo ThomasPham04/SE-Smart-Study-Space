@@ -19,18 +19,10 @@ class Reservation {
     }
 
     public function create() {
-        // Example: Insert reservation into DB
-        // $stmt = $this->conn->prepare("INSERT INTO bookings (user_id, room_id, booking_date, start_time, end_time, status) VALUES (?, ?, ?, ?, ?, ?)");
-        // $stmt->bind_param("iissss", $this->userId, $this->roomId, $this->startTime, $this->startTime, $this->endTime, $this->status);
-        // return $stmt->execute();
         return true;
     }
 
-    public function cancel() {
-        // Example: Update reservation status in DB
-        // $stmt = $this->conn->prepare("UPDATE bookings SET status = 'cancelled' WHERE id = ?");
-        // $stmt->bind_param("i", $this->reservationId);
-        // return $stmt->execute();
+    public function cancel() {();
         return true;
     }
 
